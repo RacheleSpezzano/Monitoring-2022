@@ -1,7 +1,7 @@
-#R code for ecosystem monitoring by remote sensing
-#First of all, we need to install additional packages
-#raster package to manage image data
-#https://cran.r-project.org/web/packages/raster/index.html
+# R code for ecosystem monitoring by remote sensing
+# First of all, we need to install additional packages
+# raster package to manage image data
+# https://cran.r-project.org/web/packages/raster/index.html
 
 install.packages("raster")
 
@@ -122,3 +122,4 @@ plotRGB(l2011, r=4, g=3, b=2, stretch= "Lin")
 par(mfrow=c(2,1))
 plotRGB(l1988,r=2, g=3, b=4, stretch= "Lin")
 plotRGB(l2011, r=2, g=3, b=4, stretch= "Lin")
+
