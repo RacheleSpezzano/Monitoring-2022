@@ -1,0 +1,62 @@
+#################PACKAGES#################
+
+library(dismo)
+library(raster)
+library(maptools)
+library(sp)
+
+#################IMPORT DATA#################
+
+Pusa_hispida <- gbif("pusa", "hispida", geo=TRUE, removeZeros = TRUE)
+colnames(Pusa_hispida)
+#show data only if lat and lon are known values (notNA)
+Ph_geo <- subset(Pusa_hispida, !is.na(lon) & !is.na(lat))
+dim(Ph_geo)
+#check the data
+data(wrld_simpl)
+plot(wrld_simpl, xlim=c(-180,180), ylim=c(-90,90), axes=TRUE, col="light yellow")
+# restore the box around the map
+box()
+# add the points
+points(Ph_geo$lon, Ph_geo$lat, col='orange', pch=20, cex=0.75)
+# plot points again to add a border, for better visibility
+points(Ph_geo$lon, Ph_geo$lat, col='red', cex=0.75)
+
+#################DATA CLEANING#################
+
+#recheck values: no NA values for lon and lat
+lonzero = subset(Ph_geo, lon=="na")
+latzero = subset(Ph_geo, lat=="na")
+
+#find and delete the duplicates
+dups <- duplicated(Ph_geo[, c('lon', 'lat')])
+sum(dups)
+phg <- Ph_geo[!dups, ]
+dim(phg)#5962
+dim(Ph_geo)#12480
+#we lost 6518 duplicates
+
+
+#make a SPDF and check mismatches
+coordinates(phg) <- ~lon+lat
+crs(phg) <- crs(wrld_simpl)
+class(phg)
+ovr <- over(phg, wrld_simpl)
+colnames(Ph_geo)
+#Which points have coordinates that are in a different country than listed in the ‘country’ field of the gbif record
+cntr <- ovr$country
+i <- which(is.na(cntr))
+## integer(0)
+j <- which(cntr != phg$country)
+# for the mismatches, bind the country names of the polygons and points
+cbind(cntr, phg$country)[j,]#character (0), no countries were found as mismatches
+
+#georeferencing problems
+georef <- subset(Ph_geo, (is.na(lon) | is.na(lat)) & ! is.na(locality) )
+#no georeferencing problems
+
+#visualize current plot of data
+data(wrld_simpl)
+plot(wrld_simpl, xlim=c(-180,180), ylim=c(-90,90), axes=TRUE, col="light yellow")
+box()
+points(phg$lon, phg$lat, col='orange', pch=20, cex=0.75)
