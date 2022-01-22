@@ -11,7 +11,7 @@ library(writexl)
 
 #################IMPORT DATA#################
 
-Pusa_hispida <- gbif("pusa", "hispida", geo=TRUE, removeZeros = TRUE)
+Pusa_hispida <- gbif("pusa", "hispida", geo=TRUE)
 colnames(Pusa_hispida)
 #show data only if lat and lon are known values (notNA)
 Ph_geo <- subset(Pusa_hispida, !is.na(lon) & !is.na(lat))
