@@ -152,6 +152,8 @@ ice<-extract(ice_thickness, phg, method="bilinear")
 ph_clim_data<-data.frame(cbind(coordinates(phg),temp, ice))
 write_xlsx(ph_clim_data,"C:/Users/hp/Desktop/Duccio_exam/ph_clim_data.xlsx")
 
+#################PLOT PRESENCE DATA ON A RASTER#################
+
 #create a SPDF
 ph_clim_data <- ph_clim_data[, 2:3]
 class(ph_clim_data)
@@ -167,10 +169,13 @@ box()
 points(ph_clim_data$lon, ph_clim_data$lat, col="black", pch=20, cex=0.75)
 #this is the current distribution of Pusa Hispida
 
+#################HYPOTHESIS#################
+
 #Hypothesis: the current distribution of Pusa hispida will probably change
 #due to strong changes in mean temperature and ice thickness 
 #expected for the end for the century (RCP 8.5). Especially, the greatest changes are 
 #expected for the area of the Barents Sea, but also the Norwegian Sea, 
 #Greenland Sea and Kara Sea. 
 
-#MAXENT???
+#################MAXENT???#################
+
