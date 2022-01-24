@@ -54,7 +54,7 @@ points(presences, pch=19)
 
 #day2
 #upload script with the function source
-setwd("C:/Users/marti/OneDrive/Documents/lab/")
+setwd(C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning)
 source("R_code_source_sdm.r")
 
 preds # elevation, precipitation, temperature, vegetation 
