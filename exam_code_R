@@ -9,7 +9,6 @@ library(ggplot2)
 library(RStoolbox)
 library(writexl)
 library(rJava)
-library(usdm)
 
 #################IMPORT DATA#################
 
