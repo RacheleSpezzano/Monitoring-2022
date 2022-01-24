@@ -2,7 +2,7 @@
 #time series of NO2 change in Europe during lockdown
 
 #set the working directory and library
-setwd("C:/Users/marti/OneDrive/Documents/lab/en")
+setwd("C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning/en")
 library(raster)
 
 #function raster create a RasterLayer object from a file
