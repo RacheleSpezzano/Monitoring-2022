@@ -7,7 +7,7 @@ install.packages("raster")
 
 library(raster)
 
-setwd(C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning)
+setwd("C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning")
 
 # we are going to import satellite data
 #brick function creates the raster file (image composed by pixels in which each pixel has a reflectance)
