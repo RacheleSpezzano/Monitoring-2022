@@ -7,8 +7,8 @@ library(ggplot2) # we will use this package for the ggplot function
 # library(gridExtra) # we will use this package for multiframe ggplot
 library(patchwork)
 
-setwd("C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning") # Windows
-setwd("C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning/LAB")
+setwd("C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning") 
+
 # brick
 # 1 list the files available
 rlist <- list.files(pattern="defor")#the function select the files called "defor"
