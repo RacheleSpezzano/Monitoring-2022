@@ -6,7 +6,7 @@ library(raster)
 #install.package "rgdal"
 
 #set the working directory
-setwd("C:/Users/marti/OneDrive/Documents/lab")
+setwd(C:/Users/hp/Desktop/UNIBO/13. MONITORING ECOSYSTEM CHANGES AND FUNCTIONING/Monitoring ecosystem changes and functioning)
 
 #importing data
 l1992 <- brick("defor1_.jpg") #image of 1992
