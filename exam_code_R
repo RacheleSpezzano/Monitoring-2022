@@ -9,6 +9,7 @@ library(ggplot2)
 library(RStoolbox)
 library(writexl)
 library(rJava)
+library(usdm)
 
 #################IMPORT DATA#################
 
@@ -32,7 +33,7 @@ points(Ph_geo$lon, Ph_geo$lat, col='red', cex=0.75)
 
 #find and delete the duplicates
 dups <- duplicated(Ph_geo[, c('lon', 'lat')])
-sum(dups)
+sum(dups)#6518
 phg <- Ph_geo[!dups, ]
 dim(phg)#5962
 dim(Ph_geo)#12480
@@ -44,14 +45,14 @@ coordinates(phg) <- ~lon+lat
 crs(phg) <- crs(wrld_simpl)
 class(phg)
 ovr <- over(phg, wrld_simpl)#at the spatial locations of object x 
-#retrieves the indexes or attributes from spatial object y
+#retrieves the indices or attributes from spatial object y
 colnames(Ph_geo)
 #Which points have coordinates that are in a different country than listed in the 'country' field of the gbif record
 cntr <- ovr$country
 i <- which(is.na(cntr))
 j <- which(cntr != phg$country)
 # for the mismatches, bind the country names of the polygons and points
-cbind(cntr, phg$country)[j,]#character (0), no countries were found as mismatches
+cbind(cntr, phg$country)[j,]#no countries were found as mismatches
 
 
 #visualize current plot of data
@@ -59,7 +60,7 @@ data(wrld_simpl)
 plot(wrld_simpl, xlim=c(-180,180), ylim=c(-90,90), axes=TRUE, col="light yellow")
 box()
 points(phg$lon, phg$lat, col='orange', pch=20, cex=0.75)
-write_xlsx(phg, "C:/Users/hp/Desktop/Duccio_exam/dataset_phg.xlsx")
+write_xlsx(phg, "C:/Users/hp/Desktop/Monitoring_exam/dataset_phg.xlsx")
 
 #################THINNING#################
 
@@ -76,25 +77,26 @@ thinned_data <- thin(
   locs.thinned.list.return = FALSE,
   write.files = TRUE,
   max.files = 5,
-  out.dir="C:/Users/hp/Desktop/Duccio_exam",
+  out.dir="C:/Users/hp/Desktop/Monitoring_exam",
   out.base = "thinned_data",
   write.log.file = TRUE,
   log.file = "spatial_thin_log.txt",
   verbose = TRUE
 )
 
-thinned_data <- read.csv("thinned_data_thin1_new_new_new.csv", sep = ",")
-write.csv(thinned_data, "C:/Users/hp/Desktop/Duccio_exam/thinned_data.csv", row.names = FALSE)
 
+write.csv(thinned_data, "C:/Users/hp/Desktop/Monitoring_exam/thinned_data.csv", row.names = FALSE)
+thinned_data <- read.csv("thinned_data.csv", sep = ",")
+dim(thinned_data)#2467
 plot(wrld_simpl, xlim=c(-180,180), ylim=c(-90,90), axes=TRUE, col="light yellow")
 box()
 points(thinned_data$lon, thinned_data$lat, col='orange', pch=20, cex=0.75)
 
 #################IMPORT RASTER LAYERS FOR THE ENV VARIABLES#################
 
-setwd("C:/Users/hp/Desktop/Duccio_exam/present")
-ice_thickness <- raster("C:/Users/hp/Desktop/Duccio_exam/present/Present.Surface.Ice.thickness.Mean.tif")
-temperature <- raster("C:/Users/hp/Desktop/Duccio_exam/present/Present.Surface.Temperature.Mean.tif")
+setwd("C:/Users/hp/Desktop/Monitoring_exam/present")
+ice_thickness <- raster("C:/Users/hp/Desktop/Monitoring_exam/present/Present.Surface.Ice.thickness.Mean.tif")
+temperature <- raster("C:/Users/hp/Desktop/Monitoring_exam/present/Present.Surface.Temperature.Mean.tif")
 
 #to better visualize the raster layers I apply the ColorRampPalette
 crp <- colorRampPalette(c('red','gold','darkgoldenrod3',"cyan","cyan4","chartreuse1","darkgreen"))(100)
@@ -102,8 +104,8 @@ plot(temperature, col = crp, main = "Global current mean ocean temperature (°C)
 plot(ice_thickness, col = crp, main = "Global mean ice thickness (m)")
 
 #let's now import the other raster layers and plot all the layers together to have a broader view on these variables
-ice_thickness_100 <- raster("C:/Users/hp/Desktop/Duccio_exam/2090_2100/ice_2090_2100.tif")
-temperature_100 <- raster("C:/Users/hp/Desktop/Duccio_exam/2090_2100/temp_2090_2100.tif")
+ice_thickness_100 <- raster("C:/Users/hp/Desktop/Monitoring_exam/2090_2100/ice_2090_2100.tif")
+temperature_100 <- raster("C:/Users/hp/Desktop/Monitoring_exam/2090_2100/temp_2090_2100.tif")
 par(mfrow=c(2,2))
 plot(temperature, col = crp, main = "Global current mean ocean temperature (°C)")
 plot(ice_thickness, col = crp, main = "Global mean ice thickness (m)")
@@ -127,38 +129,47 @@ cropped_ice_100 <- crop(ice_thickness_100, ext)
 
 par(mfrow=c(1,2))
 plot(cropped_temp, col = crp, main = "Arctic Circle's current mean ocean temperature  (°C)")
-plot(cropped_temp_100, col = crp, main = "Arctic Circle's expected future mean ocean temperature (2090-2100)  (°C)")
+plot(cropped_temp_100, col = crp, main = "Arctic Circle's expected mean ocean temperature (2090-2100)  (°C)")
+dev.off()
 AC_difference_temp <-cropped_temp_100 - cropped_temp
 plot(AC_difference_temp, col = crp, main = "Arctic Circle's expected future changes in mean ocean temperature (°C)")
 
+par(mfrow=c(1,2))
 plot(cropped_ice, col = crp, main = "Arctic Circle's current mean ice thickness  (m)")
 plot(cropped_ice_100, col = crp, main = "Arctic Circle's expected future mean ice thickness (2090-2100)  (m)")
+dev.off()
 AC_difference_ice <- cropped_ice-cropped_ice_100
 plot(AC_difference_ice, col = crp, main = "Arctic Circle's expected future changes in mean ice thickness  (m)")
 
 #################EXTRACT AND CREATE THE CREATE THE DATASET#################
 
-temp<-extract(temperature, phg, method="bilinear")#bilinear method because my variables are continuous
-ice<-extract(ice_thickness, phg, method="bilinear")
-ph_clim_data<-data.frame(cbind(coordinates(phg),temp, ice))
-write_xlsx(ph_clim_data,"C:/Users/hp/Desktop/Duccio_exam/ph_clim_data.xlsx")
+#create a SPDF
+coordinates(thinned_data) <- ~lon+lat
+crs(thinned_data) <- crs(wrld_simpl)
+class(thinned_data)
+
+#extract
+temp<-extract(cropped_temp, thinned_data, method="bilinear")#bilinear method because my variables are continuous
+ice<-extract(cropped_ice, thinned_data, method="bilinear")
+ph_env_data<-data.frame(cbind(coordinates(thinned_data),temp, ice))
+write_xlsx(ph_env_data,"C:/Users/hp/Desktop/Monitoring_exam/ph_env_data.xlsx")
+
+#dataset ripulito dai NA values in Excel
+dim(ph_env_data)#1838
 
 #################PLOT PRESENCE DATA ON A RASTER#################
 
 #create a SPDF
-ph_clim_data <- ph_clim_data[, 2:3]
-class(ph_clim_data)
-
-data(wrld_simpl)
-coordinates(ph_clim_data) <- ~lon+lat
-crs(ph_clim_data) <- crs(wrld_simpl)
-class(ph_clim_data)
+coordinates(ph_env_data) <- ~lon+lat
+crs(ph_env_data) <- crs(wrld_simpl)
+class(ph_env_data)
 
 #let's plot the presence data related to the polar circle on the raster layer of the current mean temperature
-plot(cropped_temp, col = crp, main = "Arctic Circle's current mean ocean temperature  (?C)")
+plot(cropped_temp, col = crp, main = "Current distribution of the ringed seal in the Arctic Circle")
 box()
-points(ph_clim_data$lon, ph_clim_data$lat, col="black", pch=20, cex=0.75)
-#this is the current distribution of Pusa Hispida
+points(ph_env_data$lon, ph_env_data$lat, col="black", pch=20, cex=0.75)
+legend(70, 94, legend = "Average ocean temperature (°C)")
+#this is the current distribution of Pusa Hispida in the Arctic Circle
 
 #################HYPOTHESIS#################
 
@@ -171,7 +182,7 @@ points(ph_clim_data$lon, ph_clim_data$lat, col="black", pch=20, cex=0.75)
 #################MAXENT#################
 
 #import thinned_data.csv
-df <- read.csv("C:/Users/hp/Desktop/Duccio_exam/thinned_data.csv", sep = ",")
+df <- read.csv("C:/Users/hp/Desktop/Monitoring_exam/thinned_data.csv", sep = ",")
 
 #make a SPDF
 coordinates(df) <- ~lon+lat
@@ -188,9 +199,8 @@ names(cropped_ice_100) <- names(cropped_ice)#assign the same names to both
 pairs(past)
 pairs(fut)
 
-#MEXENT
+#MAXENT
 model <- maxent(p = df, x = past, nbg = 20000)
-#MODEL TEMP E ICE: http://localhost:30232/session/raster/maxent/47402752101/maxent.html
 
 #response curve: prob finding the species at those variables values
 plot(model)#variable importance
@@ -198,14 +208,18 @@ response(model)#curves: probability of occurence on temperature/ice thickness
 #RISULTATO STRANO, SINGOLARMENTE ESCE DIVERSO
 
 #prediction past 
-map_past_ice <- predict(model2, cropped_ice)#prob suitability based on current conditions
+map_past <- predict(model, past)#prob suitability based on current conditions
 plot(map_past)
 
 #prediction future
-map_fut <- predict(model2, cropped_ice_100)
+map_fut <- predict(model, fut)
 plot(map_fut)
 
 par(mfrow= c(1,2))
 plot(map_fut)
 plot(map_past)
 dev.off()
+
+#1-VARIABLE MODEL: MAXENT, CROPPED_TEMP
+model_temp <- maxent(p = df, x = cropped_temp, nbg = 20000)
+response(model_temp)
