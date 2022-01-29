@@ -8,7 +8,6 @@ library(spThin)
 library(ggplot2)
 library(RStoolbox)
 library(writexl)
-library(rJava)
 
 #################SET THE WORKING DIRECTORY#################
 
