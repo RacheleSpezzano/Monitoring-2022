@@ -52,7 +52,6 @@ colnames(Ph_geo)
 #Which points have coordinates that are in a different country 
 #than listed in the 'country' field of the gbif record?
 cntr <- ovr$country
-i <- which(is.na(cntr))
 j <- which(cntr != phg$country)
 # for the mismatches, bind the country names of the polygons and points
 cbind(cntr, phg$country)[j,]#no countries were found as mismatches
