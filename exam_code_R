@@ -61,6 +61,9 @@ cbind(cntr, phg$country)[j,]#no countries were found as mismatches
 #plot cleaned data
 plot(wrld_simpl, xlim=c(-180,180), ylim=c(-90,90), axes=TRUE, col="#FFCC66", bg = "light blue", main = "Global distribution of the ringed seal")
 points(phg$lon, phg$lat, col='red', pch=20, cex=0.75)
+
+#back to normal dataframe and save
+phg <- as.data.frame(phg)
 write_xlsx(phg, "C:/Users/hp/Desktop/Monitoring_exam/dataset_phg.xlsx")
 
 #################THINNING#################
@@ -79,8 +82,7 @@ thinned_data <- thin(
   out.base = "thinned_data",
   write.log.file = TRUE,
   log.file = "spatial_thin_log.txt",
-  verbose = TRUE
-)
+  verbose = TRUE)
 
 thinned_data <- read.csv("thinned_data.csv", sep = ",")
 dim(thinned_data)#2467
@@ -175,21 +177,29 @@ names(fut) <- names(past) #assign the same names to both
 
 #MAXENT: x = env variables, p = occurrences (as SPDF or dataframe)
 model <- maxent(p = thinned_data2, x = past, nbg = 20000)
-#response curve: prob finding the species at those variables values
+
+#response curve: prob finding the species at those variable values
 plot(model)#variable importance
 response(model)#curves: probability of occurence on temperature/ice thickness
 
 #prediction past 
 map_past <- predict(model, past)#prob suitability based on current conditions
+
+#prediction future
+map_fut <- predict(model, fut)#prob suitability based on expected future conditions
+
+#save the raster layers
+
+writeRaster(map_past, filename = "C:/Users/hp/Desktop/Monitoring_exam/present")
+writeRaster(map_fut, filename = "C:/Users/hp/Desktop/Monitoring_exam/future")
+
+#plot the layers
 names(map_past) <- "Probability"
 p1 <- ggplot() + geom_raster(map_past, mapping = aes(x = x,y = y, fill=Probability))+
   scale_fill_viridis(option= "turbo", na.value = "transparent")+ theme_gray()+
   ggtitle("Present distribution probabilities of the ringed seal")+labs(x = "Longitude", y = "Latitude", caption = "Prediction: Maxent version 3.4.3") + 
   theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
 
-
-#prediction future
-map_fut <- predict(model, fut)
 names(map_fut) <- "Probability"
 p2 <- ggplot() + geom_raster(map_fut, mapping = aes(x = x,y = y, fill=Probability))+
   scale_fill_viridis(option= "turbo", na.value = "transparent")+ theme_gray()+
@@ -199,7 +209,7 @@ p2 <- ggplot() + geom_raster(map_fut, mapping = aes(x = x,y = y, fill=Probabilit
 #plot the graphs together (using patchwork package)
 p1 + p2
 
-#plot temperature changes with ggplot2
+#plot temperature changes with ggplot2 to better understand the conclusions
 names(cropped_temp) <- "Temperature"
 p3 <- ggplot() + geom_raster(cropped_temp, mapping = aes(x = x,y = y, fill=Temperature))+
   scale_fill_viridis(option= "turbo", na.value = "transparent")+ theme_gray()+
@@ -220,9 +230,35 @@ ggplot() + geom_raster(AC_difference_temp, mapping = aes(x = x,y = y, fill=Varia
   ggtitle("Expected temperature variation at the end of the century (°C)")+labs(x = "Longitude", y = "Latitude") + 
   theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
 
-#save the raster layers
+#in order to create graphs to be as colorblind-friendly as possible I also plotted the same graphs using cividis
 
-writeRaster(map_past, filename = "C:/Users/hp/Desktop/Monitoring_exam/present")
-writeRaster(map_fut, filename = "C:/Users/hp/Desktop/Monitoring_exam/future")
+p1 <- ggplot() + geom_raster(map_past, mapping = aes(x = x,y = y, fill=Probability))+
+  scale_fill_viridis(option= "cividis", na.value = "transparent")+ theme_gray()+
+  ggtitle("Present distribution probabilities of the ringed seal")+labs(x = "Longitude", y = "Latitude", caption = "Prediction: Maxent version 3.4.3") + 
+  theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
+
+p2 <- ggplot() + geom_raster(map_fut, mapping = aes(x = x,y = y, fill=Probability))+
+  scale_fill_viridis(option= "cividis", na.value = "transparent")+ theme_gray()+
+  ggtitle("Future distribution probabilities of the ringed seal")+labs(x = "Longitude", y = "Latitude", caption = "Prediction: Maxent version 3.4.3") + 
+  theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
+
+p1 + p2
+
+p3 <- ggplot() + geom_raster(cropped_temp, mapping = aes(x = x,y = y, fill=Temperature))+
+  scale_fill_viridis(option= "cividis", na.value = "transparent")+ theme_gray()+
+  ggtitle("Current mean temperature (°C)")+labs(x = "Longitude", y = "Latitude") + 
+  theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
+
+p4 <- ggplot() + geom_raster(cropped_temp_100, mapping = aes(x = x,y = y, fill=Temperature))+
+  scale_fill_viridis(option= "cividis", na.value = "transparent")+ theme_gray()+
+  ggtitle("Expected future mean temperature (°C)")+labs(x = "Longitude", y = "Latitude") + 
+  theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
+
+p3 + p4
+
+ggplot() + geom_raster(AC_difference_temp, mapping = aes(x = x,y = y, fill=Variation))+
+  scale_fill_viridis(option= "cividis", na.value = "transparent")+ theme_gray()+
+  ggtitle("Expected temperature variation at the end of the century (°C)")+labs(x = "Longitude", y = "Latitude") + 
+  theme(axis.title = element_text(size = 15, face = "italic"), plot.title = element_text(hjust = 0.5, size = 16, face = "bold.italic"))
 
 
