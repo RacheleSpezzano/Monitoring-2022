@@ -175,6 +175,10 @@ past <- stack(cropped_temp, cropped_ice)
 fut <- stack(cropped_temp_100, cropped_ice_100)
 names(fut) <- names(past) #assign the same names to both
 
+#correlation
+pairs(past)
+pairs(fut)
+
 #MAXENT: x = env variables, p = occurrences (as SPDF or dataframe)
 model <- maxent(p = thinned_data2, x = past, nbg = 20000)
 
